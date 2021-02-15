@@ -1,5 +1,6 @@
 from . import bservers
 import paramiko
+import datetime
 import zipfile
 import random
 import string
@@ -12,6 +13,7 @@ class Instance:
     def __init__(self, source, delay):
         self.source = source
         self.delay = delay
+        self.backup_next = None
 
         self.id = self.__new_id()
 
@@ -28,8 +30,12 @@ class Instance:
                 with SFTPClient.from_transport(tp) as sftp:
                     sftp.mkdir(target, ignore_existing=True)
                     sftp.put_dir(self.source, target)
-                
-                   
+    
+    def is_time_between(self, begin_time):
+        end_time = datetime.datetime.now()
+    
+        return self.backup_next >= begin_time and self.backup_next <= end_time
+
     def __new_id(self):
         return  'b-' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=32))
 

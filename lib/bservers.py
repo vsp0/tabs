@@ -17,10 +17,14 @@ class BServer:
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-        client.connect(
-            self.ip, 
-            username=self.user, 
-            password=self.passwd, 
-            key_filename=self.key_file)
+        try:
+            client.connect(
+                self.ip, 
+                username=self.user, 
+                password=self.passwd, 
+                key_filename=self.key_file)
+        
+        except:
+            return False
         
         return True
