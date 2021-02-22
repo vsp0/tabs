@@ -12,7 +12,7 @@ instances = []
 class Instance:
     def __init__(self, source, delay):
         self.source = source
-        self.delay = delay
+        self.delay = int(delay)
         self.backup_next = None
 
         self.id = self.__new_id()
@@ -22,17 +22,23 @@ class Instance:
     def backup(self):
         for bserver in bservers.bservers:
             if bserver.can_connect():
+                print(f'Successfully connected to {bserver.ip}...')
+
                 tp = paramiko.Transport((bserver.ip, 22))
                 tp.connect(username=bserver.user, password=bserver.passwd)
 
-                target = f'/home/{bserver.user}/TABS/Instances/{self.id}'
+                target = bservers.get_target(bserver, self)
 
                 with SFTPClient.from_transport(tp) as sftp:
                     sftp.mkdir(target, ignore_existing=True)
                     sftp.put_dir(self.source, target)
+            
+            else:
+                print(f'Failed to connect to {bserver.ip}...')
     
     def is_time_between(self, begin_time):
-        end_time = datetime.datetime.now()
+        one_second = datetime.timedelta(seconds=1)
+        end_time = datetime.datetime.now() + one_second
     
         return self.backup_next >= begin_time and self.backup_next <= end_time
 

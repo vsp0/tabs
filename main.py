@@ -4,16 +4,22 @@ import datetime
 import json
 
 
-servers = json.load(open('creds/servers.json'))
-instances = json.load(open('creds/instances.json'))
+servers = json.load(open('data/servers.json'))
+instances = json.load(open('data/instances.json'))
+
+
+print('Initializing servers...')
 
 for server in servers.values():
     bservers.BServer(
         server['ip'], 
         server['user'], 
+        server['server_path'],
         server['passwd'], 
         server['key_file']
     )
+
+print('Initializing instances...')
 
 for instance in instances.values():
     b_instances.Instance(
@@ -22,11 +28,15 @@ for instance in instances.values():
     )
 
 for instance in b_instances.instances:
+    print(f'Backing up instance {instance.id}...')
+
     instance.backup()
 
     delay = datetime.timedelta(seconds=instance.delay)
 
     instance.backup_next = datetime.datetime.now() + delay
+
+    print(f'Successfully backed up {instance.id}, next backup scheduled to {instance.backup_next}...')
 
 
 while True:
@@ -34,8 +44,12 @@ while True:
 
     for instance in b_instances.instances:
         if instance.is_time_between(started):
+            print(f'Backing up instance {instance.id}...')
+
             instance.backup()
 
             delay = datetime.timedelta(seconds=instance.delay)
 
             instance.backup_next = datetime.datetime.now() + delay
+
+            print(f'Successfully backed up {instance.id}, next backup scheduled to {instance.backup_next}...')

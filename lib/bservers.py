@@ -4,9 +4,10 @@ bservers = []
 
 
 class BServer:
-    def __init__(self, ip, user, passwd=None, key_file=None):
+    def __init__(self, ip, user, server_path, passwd=None, key_file=None):
         self.ip = ip
         self.user = user
+        self.server_path = server_path
 
         self.passwd = passwd
         self.key_file = key_file
@@ -28,3 +29,10 @@ class BServer:
             return False
         
         return True
+
+
+def get_target(bserver, instance):
+    if bserver.server_path.endswith('/'):
+        return bserver.server_path + f"{instance.id}"
+    
+    return bserver.server_path + f"/{instance.id}"
