@@ -1,7 +1,6 @@
 from . import bservers
 import paramiko
 import datetime
-import zipfile
 import random
 import string
 import os
@@ -29,7 +28,7 @@ class Instance:
 
                 target = bservers.get_target(bserver, self)
 
-                with SFTPClient.from_transport(tp) as sftp:
+                with FolderSFTPClient.from_transport(tp) as sftp:
                     sftp.mkdir(target, ignore_existing=True)
                     sftp.put_dir(self.source, target)
             
@@ -46,7 +45,7 @@ class Instance:
         return  'b-' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=32))
 
 
-class SFTPClient(paramiko.SFTPClient):
+class FolderSFTPClient(paramiko.SFTPClient):
     def put_dir(self, source, target):
         for item in os.listdir(source):
             if os.path.isfile(os.path.join(source, item)):
@@ -58,7 +57,7 @@ class SFTPClient(paramiko.SFTPClient):
 
     def mkdir(self, path, mode=511, ignore_existing=False):
         try:
-            super(SFTPClient, self).mkdir(path, mode)
+            super(FolderSFTPClient, self).mkdir(path, mode)
 
         except IOError:
             if ignore_existing:
